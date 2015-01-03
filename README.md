@@ -36,6 +36,7 @@ Cache::SDBM is a simple cache based on SDBM\_File.
 - `$cache->set($key, $value, [$option])`
 - `$value = $cache->compute($key, [$option,] $code)`
 - `$cache->remove($key)`
+- `$bool = $cache->utf8, $cache->utf8($bool)`
 
 # CAVEATS
 

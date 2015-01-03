@@ -5,6 +5,7 @@ use warnings;
 use Carp 'croak';
 use SDBM_File;
 use Fcntl qw(:DEFAULT);
+use Encode qw(encode_utf8 decode_utf8);
 
 our $VERSION = "0.01";
 
@@ -15,10 +16,18 @@ sub new {
     bless { sdbm => \%sdbm }, $class;
 }
 
+sub utf8 {
+    my $self = shift;
+    $self->{utf8} = shift if @_;
+    $self->{utf8};
+}
+
 sub get {
     my ($self, $key) = @_;
-    my $raw_value = $self->{sdbm}{$key}
-        or return;
+    my $raw_value = $self->{sdbm}{ $self->utf8 ? encode_utf8($key) : $key };
+    return unless defined $raw_value;
+
+    $raw_value = decode_utf8 $raw_value if $self->utf8;
 
     my ($expires_at, $value) = split /\t/, $raw_value, 2;
     if (!$expires_at || $expires_at >= time) {
@@ -45,6 +54,12 @@ sub set {
     }
 
     my $raw_value = "$expires_at\t$value";
+
+    if ($self->utf8) {
+        $raw_value = encode_utf8 $raw_value;
+        $key = encode_utf8 $key;
+    }
+
     if ( 16 + length($key) + length($raw_value) > 1024 ) {
         croak "too long cache entry for key '$key'";
     }
@@ -53,7 +68,7 @@ sub set {
 
 sub remove {
     my ($self, $key) = @_;
-    delete $self->{sdbm}{$key};
+    delete $self->{sdbm}{ $self->utf8 ? encode_utf8($key) : $key };
 }
 
 sub compute {
@@ -121,6 +136,8 @@ Cache::SDBM is a simple cache based on SDBM_File.
 =item C<< $value = $cache->compute($key, [$option,] $code) >>
 
 =item C<< $cache->remove($key) >>
+
+=item C<< $bool = $cache->utf8, $cache->utf8($bool) >>
 
 =back
 

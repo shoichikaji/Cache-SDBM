@@ -71,11 +71,10 @@ subtest compute_expire => sub {
     is $cache->get("foo"), undef;
 };
 
-subtest perl_string => sub {
-    plan skip_all => "todo: how to treat Perl string";
-
+subtest utf8 => sub {
     my $tempdir = tempdir;
     my $cache = Cache::SDBM->new("$tempdir/test");
+    $cache->utf8(1);
 
     $cache->set("foo", "あ");
     is $cache->get("foo"), "あ";
