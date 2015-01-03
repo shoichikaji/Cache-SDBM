@@ -45,7 +45,7 @@ sub set {
     }
 
     my $raw_value = "$expires_at\t$value";
-    if ( length($key) + length($raw_value) > 1024 ) {
+    if ( 16 + length($key) + length($raw_value) > 1024 ) {
         croak "too long cache entry for key '$key'";
     }
     $self->{sdbm}{$key} = $raw_value;
