@@ -71,5 +71,17 @@ subtest compute_expire => sub {
     is $cache->get("foo"), undef;
 };
 
+subtest perl_string => sub {
+    plan skip_all => "todo: how to treat Perl string";
+
+    my $tempdir = tempdir;
+    my $cache = Cache::SDBM->new("$tempdir/test");
+
+    $cache->set("foo", "あ");
+    is $cache->get("foo"), "あ";
+    $cache->set("あ", "bar");
+    is $cache->get("あ"), "bar";
+};
+
 
 done_testing;
